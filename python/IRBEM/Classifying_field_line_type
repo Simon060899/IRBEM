@@ -1,0 +1,38 @@
+import IRBEM
+
+# Initialize the magnetic field model with appropriate parameters
+model = IRBEM.MagFields(options=[0, 0, 0, 0, 0], kext='T89')
+
+# Define initial position and time
+X = {
+    'x1': 600,  # Altitude in km
+    'x2': 60,   # Latitude
+    'x3': 50,   # Longitude
+    'dateTime': '2031-02-02T06:12:43'  # Time
+}
+
+maginput = {
+    'Kp': 40.0  # Example magnetic field input
+}
+stopAlt = 100  # Footprint altitude above Earth's surface in km
+hemiFlag = 0   # Same hemisphere as starting point
+
+# Trace the field line
+footpoint_result = model.find_foot_point(X, maginput, stopAlt, hemiFlag)
+def classify_field_line(footpoint_result):
+    XFOOT = footpoint_result['XFOOT']
+    BFOOT = footpoint_result['BFOOT']
+
+    if XFOOT[0] == -9999:
+        return "IMF Line"
+    
+    # Assuming the model finds footpoints correctly
+    if len(set(XFOOT)) == 1:
+        return "Open Field Line"
+    elif len(set(XFOOT)) == 2:
+        return "Closed Field Line"
+    else:
+        return "Unclassified"
+
+field_line_type = classify_field_line(footpoint_result)
+print("Field Line Type:", field_line_type,footpoint_result)

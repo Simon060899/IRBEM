@@ -13,12 +13,12 @@ def test_conversions():
     
     time = datetime(1996, 8, 28, 16, 46)
     pos = np.array([6.9027400, -1.6362400, 1.9166900])
-    print('Single entry', cObj.coords_transform(time, pos, 'GEO', 'GEO'))
+    print('Single entry', cObj.transform(time, pos, 'GEO', 'GEO'))
     
     time = [datetime(1996, 8, 28, 16, 46), datetime(2000, 8, 29, 2, 46)]
     pos = np.array([[6.9027400, -1.6362400, 1.9166900], 
         [6.9027400, -1.6362400, 1.9166900]])
-    print('Multi entry', cObj.coords_transform(time, pos, 'GEO', 'MAG'))
+    print('Multi entry', cObj.transform(time, pos, 'GEO', 'MAG'))
     return
     
 if __name__ == '__main__':

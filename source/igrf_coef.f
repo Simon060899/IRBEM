@@ -1133,12 +1133,18 @@ C
      *      0.00d0,    -0.20d0,     0.60d0,    -0.20d0,     0.50d0,
      *     -0.30d0,    -0.40d0,     0.50d0,     0.00d0
      * /
-       if ((year.lt.1900.d0).or.(year.gt.2025.d0)) then
+        if ((year.lt.1900.d0).or.(year.gt.2030.d0)) then
          ierr=1
          if (year_error_reported .eq. 0) then
-           write(*,999) year
-           year_error_reported = 1
+            write(*,999) year
+            year_error_reported = 1
          endif
+       elseif (year.gt.2025.d0) then
+          ierr=0
+          if (year_error_reported .eq. 0) then
+            write(*,998) year
+            year_error_reported = 1
+          endif
        endif
        if (year.lt.1905.d0) goto 1905  ! interpolate between  1900 - 1905
        if (year.lt.1910.d0) goto 1910  ! interpolate between  1905 - 1910
@@ -1454,7 +1460,10 @@ c
 C
 999    format(//1x,
      *   '*** WARNING -- Input year = ',F7.2,/
-     *   ' is out of valid range 1900-2025 Using nearest ***'//)
+     *   ' is out of valid range 1900-2030 Using nearest ***'//)
+998    format(//1x,
+     *   '*** WARNING -- Input year = ',F7.2,/
+     *   ' is between 2025 and 2030. Extrapolating ***'//)
 c
        return
        end
