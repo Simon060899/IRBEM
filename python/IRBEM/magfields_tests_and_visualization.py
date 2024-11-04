@@ -34,7 +34,12 @@ def testLStarOutput(test_datetime = True):
         datetime.datetime(2015, 2, 2, 6,12, 43)]
     else:
         LLA['dateTime'] = ['2015-02-02T06:12:43', '2015-02-02T06:12:43']
-    maginput = {'Kp':[40.0, 50]}
+    maginput = {
+        'Dst': 0,     # Dst index (nT)
+        'Pdyn': 2.0,  # Solar wind dynamic pressure (nPa)
+        'By': 0.0,    # GSM y-component of IMF (nT)
+        'Bz': 0.0     # GSM z-component of IMF (nT)
+    }
     model.make_lstar(LLA, maginput)
     print(model.make_lstar_output)
 
@@ -47,13 +52,18 @@ def footPointTest():
     'BFOOT': [-30667.04604376155, -7651.837684485317, -39138.97550317413],
     'BFOOTMAG': [50307.82977269011, -9999.0, -9999.0]}
     """
-    model = MagFields(options = [0,0,0,0,0], verbose = True)
+    model = MagFields(options = [0,0,0,0,0], verbose = True, kext=7)
     LLA = {}
     LLA['x1'] = 651
     LLA['x2'] = 63.97
     LLA['x3'] = 15.9
     LLA['dateTime'] = '2015-02-02T06:12:43'
-    maginput = {'Kp':40.0} 
+    maginput = {
+        'Dst': 0,     # Dst index (nT)
+        'Pdyn': 2.0,  # Solar wind dynamic pressure (nPa)
+        'By': 0.0,    # GSM y-component of IMF (nT)
+        'Bz': 0.0     # GSM z-component of IMF (nT)
+    } 
     stopAlt = 100
     hemiFlag = 0
     model.find_foot_point(LLA, maginput, stopAlt, hemiFlag)
