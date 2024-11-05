@@ -459,8 +459,7 @@ class MagFields:
         blocalType = (ctypes.c_double * 3000)
         blocal = blocalType()
     
-        if self.TMI: print("Running trace_field_line. Python may",
-            "temporarily stop responding")
+        if self.TMI: print("Running trace_field_line")
         
         self._irbem_obj.trace_field_line2_1_(ctypes.byref(self.kext), \
                 ctypes.byref(self.options),\
@@ -471,9 +470,21 @@ class MagFields:
                 ctypes.byref(bmin), ctypes.byref(xj), ctypes.byref(posit), \
                 ctypes.byref(Nposit))
                 
-        self.trace_field_line_output = {'POSIT':np.array(posit[:Nposit.value]), \
-        "Nposit":Nposit.value, 'lm':lm.value, 'blocal':np.array(blocal[:Nposit.value]), \
-        'bmin':bmin.value, 'xj':xj.value}        
+        # Convert the output to a more usable format
+        if Nposit.value > 0:
+            positions = np.array([np.array(posit[i]) for i in range(Nposit.value)])
+            positions = positions.T  # Transpose to get (3, N) shape
+        else:
+            positions = np.array([])
+            
+        self.trace_field_line_output = {
+            'POSIT': positions,
+            'Nposit': Nposit.value,
+            'lm': lm.value,
+            'blocal': np.array(blocal[:Nposit.value]),
+            'bmin': bmin.value,
+            'xj': xj.value
+        }
         return self.trace_field_line_output
         
     def find_magequator(self, X, maginput):
@@ -1186,5 +1197,5 @@ energy in different units.
 These functions should be used with caution in your own applications!
 """
 beta = lambda Ek, Erest = 511: np.sqrt(1-((Ek/Erest)+1)**(-2)) # Ek,a dErest must be in keV
-gamma = lambda Ek, Erest = 511:np.sqrt(1-beta(Ek, Erest = 511)**2)**(-1/2)
+gamma = lambda Ek, Erest = 511: np.sqrt(1-beta(Ek, Erest = 511)**2)**(-1/2)
 vparalel = lambda Ek, Bm, B, Erest = 511:c*beta(Ek, Erest)*np.sqrt(1 - np.abs(B/Bm))

@@ -19,8 +19,8 @@ def classify_field_line(position, dateTime, maginput):
     """
     # Initialize the MagFields class with desired settings
     # Do not set 'kext' explicitly; infer it from 'maginput' based on required fields
-    model = MagFields(options=[0, 0, 0, 0, 0], verbose=False,
-                      kext=,
+    model = MagFields(options=[0, 0, 0, 0, 0], verbose=True,
+                      kext=7,
                       sysaxes = 3)
     # Prepare the inputs
     LLA = {
@@ -83,8 +83,8 @@ def prepare_maginput(row):
     return {
         'Dst': row['Dst_index'],
         'Pdyn': row['Pdyn'],
-        'By': row['BY_GSM'],
-        'Bz': row['BZ_GSM']
+        'ByIMF': row['BY_GSM'],
+        'BzIMF': row['BZ_GSM']
     }
 
 def get_numeric_classification(classification):

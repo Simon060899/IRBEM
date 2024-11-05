@@ -139,8 +139,8 @@ if __name__ == '__main__':
     maginput = {
         'Pdyn': 2.0,  # Solar wind dynamic pressure (nPa)
         'Dst': 0,     # Dst index (nT)
-        'By': 0.0,    # GSM y-component of IMF (nT)
-        'Bz': 0.0,    # GSM z-component of IMF (nT)
+        'ByIMF': 0.0,    # GSM y-component of IMF (nT)
+        'BzIMF': 0.0,    # GSM z-component of IMF (nT)
     }
 
     # Classify the field line and generate plot

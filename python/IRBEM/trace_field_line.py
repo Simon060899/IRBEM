@@ -2,6 +2,7 @@ from IRBEM import MagFields
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import sys
 
 def trace_and_plot_field_line(position, dateTime, maginput):
     """
@@ -17,10 +18,11 @@ def trace_and_plot_field_line(position, dateTime, maginput):
     print(f"DateTime: {dateTime}")
     print(f"Maginput: {maginput}")
     
-    # Initialize the MagFields class
+    # Initialize the MagFields class with debugging enabled
     model = MagFields(options=[0, 0, 0, 0, 0], 
                      kext=7,  # T96 model
-                     sysaxes=3)  # GSM coordinates
+                     sysaxes=3,  # GEO coordinates
+                     verbose=True)
     
     # Prepare input for field line tracing
     LLA = {
@@ -30,21 +32,36 @@ def trace_and_plot_field_line(position, dateTime, maginput):
         'dateTime': dateTime
     }
     
-    # Trace the field line
-    trace_output = model.trace_field_line(LLA, maginput)
+    # First check if the position is valid (inside magnetosphere)
+    r = np.sqrt(position['x1']**2 + position['x2']**2 + position['x3']**2)
+    if r < 1.0:
+        print("Error: Position is inside the Earth!")
+        return
+    if r > 10.0:
+        print("Warning: Position might be outside the magnetosphere")
     
-    print("\nTrace Output Info:")
-    for key, value in trace_output.items():
-        print(f"{key}: {value.shape if hasattr(value, 'shape') else value}")
-    
-    if 'POSIT' in trace_output:
-        positions = trace_output['POSIT']
-        if positions.size > 0:
+    try:
+        # Trace the field line
+        trace_output = model.trace_field_line(LLA, maginput)
+        
+        print("\nTrace Output Info:")
+        print(f"Number of points (Nposit): {trace_output['Nposit']}")
+        print(f"L shell parameter (lm): {trace_output['lm']}")
+        print(f"Minimum B value (bmin): {trace_output['bmin']}")
+        
+        if trace_output['Nposit'] > 0:
+            positions = trace_output['POSIT']
+            print(f"Position array shape: {positions.shape}")
             plot_field_line(positions)
         else:
             print("Warning: No field line points available for plotting")
-    else:
-        print("Error: No position data in trace output")
+            print("This might indicate that:")
+            print("1. The field line is open (extends into interplanetary space)")
+            print("2. The starting position is invalid")
+            print("3. The magnetic field model parameters are incorrect")
+            print(f"Raw trace output: {trace_output}")
+    except Exception as e:
+        print(f"Error during field line tracing: {str(e)}")
 
 def plot_field_line(positions):
     """
@@ -96,24 +113,36 @@ def plot_field_line(positions):
     # Add legend
     ax.legend()
     
-    plt.show()
+    plt.savefig(f'field_line_trace_{i+1}.png')
+    plt.close()
 
 if __name__ == '__main__':
-    # Define test cases
+    # Test magnetic field model initialization
+    try:
+        test_model = MagFields(options=[0, 0, 0, 0, 0], 
+                             kext=7,
+                             sysaxes=3,
+                             verbose=True)
+        print("Successfully initialized magnetic field model")
+    except Exception as e:
+        print(f"Error initializing magnetic field model: {str(e)}")
+        sys.exit(1)
+
+    # Define test cases with more conservative positions
     test_positions = [
-        {'x1': 7.5, 'x2': 3.0, 'x3': 2.0},  # Original position
-        {'x1': 4.0, 'x2': 0.0, 'x3': 0.0},  # On X-axis
-        {'x1': 3.0, 'x2': 0.0, 'x3': 3.0},  # In X-Z plane
+        {'x1': 4.0, 'x2': 0.0, 'x3': 0.0},  # Equatorial point at 4 RE
+        {'x1': 2.0, 'x2': 0.0, 'x3': 1.0},  # Closer to Earth
+        {'x1': 3.0, 'x2': 1.0, 'x3': 1.0},  # Off-axis position
     ]
     
     dateTime = '2024-01-01T00:00:00'
     
-    # Magnetic field parameters for T96 model
+    # Magnetic field parameters for T96 model need specific keys
     maginput = {
-        'Pdyn': 2.0,  # Solar wind dynamic pressure (nPa)
-        'Dst': 0,     # Dst index (nT)
-        'By': 0.0,    # GSM y-component of IMF (nT)
-        'Bz': 0.0,    # GSM z-component of IMF (nT)
+        'Pdyn': 2.0,    # Solar wind dynamic pressure (nPa)
+        'Dst': -20,     # Dst index (nT)
+        'ByIMF': 2.0,   # IMF By (nT) - note the key change from 'By' to 'ByIMF'
+        'BzIMF': -2.0,  # IMF Bz (nT) - note the key change from 'Bz' to 'BzIMF'
     }
     
     # Try each test position
